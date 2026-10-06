@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duelo da Probabilidade - Jogo Educativo</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            fantasy: ['Cinzel', 'serif'],
+          },
+          colors: {
+            comum: { light: '#4ade80', DEFAULT: '#2e7d32', dark: '#14532d', glow: 'rgba(74, 222, 128, 0.4)' },
+            rara: { light: '#60a5fa', DEFAULT: '#1565c0', dark: '#1e3a8a', glow: 'rgba(96, 165, 250, 0.4)' },
+            especial: { light: '#facc15', DEFAULT: '#d4af37', dark: '#713f12', glow: 'rgba(250, 204, 21, 0.5)' }
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 2s infinite',
+            'shuffle': 'shuffle 0.6s ease-in-out',
+            'flip': 'flipCard 0.8s ease-out forwards',
+            'victory-glow': 'victoryGlow 1.5s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.6', filter: 'drop-shadow(0 0 15px rgba(234,179,8,0.4))' },
+              '50%': { opacity: '1', filter: 'drop-shadow(0 0 25px rgba(234,179,8,0.8))' }
+            },
+            shuffle: {
+              '0%': { transform: 'translateX(0) rotate(0deg)' },
+              '25%': { transform: 'translateX(-30px) rotate(-10deg)' },
+              '50%': { transform: 'translateX(30px) rotate(10deg)' },
+              '75%': { transform: 'translateX(-15px) rotate(-5deg)' },
+              '100%': { transform: 'translateX(0) rotate(0deg)' }
+            },
+            flipCard: {
+              '0%': { transform: 'rotateY(180deg) scale(0.8)' },
+              '100%': { transform: 'rotateY(0deg) scale(1)' }
+            },
+            victoryGlow: {
+              '0%': { boxShadow: '0 0 15px rgba(250, 204, 21, 0.4)', transform: 'scale(1)' },
+              '100%': { boxShadow: '0 0 30px rgba(250, 204, 21, 0.9)', transform: 'scale(1.05)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+
+    .glow-comum { box-shadow: 0 0 20px rgba(46, 125, 50, 0.6); }
+    .glow-rara { box-shadow: 0 0 25px rgba(21, 101, 192, 0.7); }
+    .glow-especial { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+
+    .arena-bg {
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.8) 0%, rgba(2, 6, 23, 0.95) 100%),
+        linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 40px 40px, 40px 40px;
+    }
+  </style>
+</head>
+<body class="h-full font-sans arena-bg text-slate-100 flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
+
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Title & Branding -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-yellow-400 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black text-xl">
+          <i class="fa-solid font-bold fa-dice-d20"></i>
+        </div>
+        <div>
+          <h1 class="font-fantasy font-black text-xl sm:text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 uppercase">
+            Duelo da Probabilidade
+          </h1>
+          <p class="text-xs text-slate-400 font-medium">Matemática Interativa • 6º & 7º Ano</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center space-x-1 bg-slate-950/60 p-1.5 rounded-xl border border-slate-800">
+        <button onclick="switchTab('arena')" id="nav-arena" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 shadow">
+          <i class="fa-solid fa-gamepad mr-2"></i>Arena de Duelo
+        </button>
+        <button onclick="switchTab('deck')" id="nav-deck" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60">
+          <i class="fa-solid fa-layer-group mr-2"></i> Deck de 10 Cartas
+        </button>
+        <button onclick="switchTab('stats')" id="nav-stats" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60">
+          <i class="fa-solid fa-chart-column mr-2"></i>Ficha & Gráficos
+        </button>
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60">
+          <i class="fa-solid fa-lightbulb mr-2"></i> Reflexão & Gabarito
+        </button>
+      </nav>
+
+      <!-- Quick Action: Duelist Badge & Reset Game -->
+      <div class="flex items-center space-x-3">
+        <div id="header-student-badge" class="hidden sm:flex items-center gap-2 bg-slate-950/80 border border-amber-500/40 px-3 py-1.5 rounded-xl text-xs">
+          <span class="text-amber-400 font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-user-ninja"></i>
+            <span id="badge-student-info" class="text-slate-200">--</span>
+          </span>
+          <button onclick="openWelcomeOverlay(true)" title="Alterar Identificação" class="ml-1 text-[11px] text-amber-400 hover:text-amber-300 underline font-semibold transition">
+            Trocar
+          </button>
+        </div>
+
+        <button onclick="resetDuel()" title="Reiniciar Duelo" class="px-3 py-2 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-2 transition active:scale-95">
+          <i class="fa-solid fa-rotate-left text-amber-400"></i>
+          <span class="hidden sm:inline">Reiniciar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Bottom Bar -->
+    <div class="md:hidden flex border-t border-slate-800 bg-slate-950/90 text-xs text-center">
+      <button onclick="switchTab('arena')" id="mob-nav-arena" class="flex-1 py-2.5 font-semibold text-amber-400 border-b-2 border-amber-400">
+        <i class="fa-solid fa-gamepad block text-base mb-0.5"></i> Arena
+      </button>
+      <button onclick="switchTab('deck')" id="mob-nav-deck" class="flex-1 py-2.5 font-semibold text-slate-400">
+        <i class="fa-solid fa-layer-group block text-base mb-0.5"></i> Deck
+      </button>
+      <button onclick="switchTab('stats')" id="mob-nav-stats" class="flex-1 py-2.5 font-semibold text-slate-400">
+        <i class="fa-solid fa-chart-column block text-base mb-0.5"></i> Ficha
+      </button>
+      <button onclick="switchTab('quiz')" id="mob-nav-quiz" class="flex-1 py-2.5 font-semibold text-slate-400">
+        <i class="fa-solid fa-lightbulb block text-base mb-0.5"></i> Reflexão
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+
+    <!-- SECTION 1: DUEL ARENA -->
+    <section id="tab-arena" class="tab-content flex-1 flex flex-col gap-6">
+      
+      <!-- Immersive Intro Banner Text -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 text-amber-400 text-2xl">
+          <i class="fa-solid fa-scroll"></i>
+        </div>
+        <div class="flex-1 text-center sm:text-left">
+          <h2 class="font-fantasy font-bold text-amber-300 text-base sm:text-lg">Desafio da Arena do Destino</h2>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+            Duelista, o Deck do Destino te desafia! Cada carta é uma probabilidade, cada retirada é um teste. Calcule suas chances, enfrente 20 rodadas e prove que você domina a matemática do acaso!
+          </p>
+        </div>
+        <div id="round-badge-container" class="bg-slate-950/80 px-4 py-2.5 rounded-xl border border-slate-800 text-center shrink-0 transition-all duration-300">
+          <span class="block text-xs text-slate-400 uppercase tracking-wider font-semibold">Progresso</span>
+          <span id="round-counter-badge" class="text-lg font-black text-amber-400 transition-all">0 / 20</span>
+          <span class="text-xs text-slate-400 block">Rodadas</span>
+        </div>
+      </div>
+
+      <!-- Completion Feedback Banner (Hidden by default) -->
+      <div id="completion-banner" class="hidden bg-gradient-to-r from-amber-950/90 via-slate-900 to-amber-950/90 border-2 border-amber-400/80 rounded-2xl p-5 shadow-2xl animate-pulse-glow flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-full bg-amber-400/20 border-2 border-amber-400 flex items-center justify-center text-amber-300 text-2xl shrink-0">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div>
+            <h3 class="font-fantasy font-black text-amber-300 text-lg">Duelo Concluído com Sucesso!</h3>
+            <p class="text-xs text-slate-200">Você finalizou as 20 retiradas com reposição. Agora os dados observados da sua Ficha estão calculados!</p>
+          </div>
+        </div>
+        <button onclick="switchTab('stats')" class="px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-2 transition transform hover:scale-105 active:scale-95 shrink-0">
+          <i class="fa-solid fa-chart-line text-sm"></i>
+          <span>Ver Minha Ficha</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-stretch">
+        
+        <!-- Left Column: Deck & Draw Controls -->
+        <div class="lg:col-span-5 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+          <div class="absolute -top-24 -left-24 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div class="w-full flex items-center justify-between">
+            <h3 class="font-fantasy font-bold text-slate-200 flex items-center gap-2">
+              <i class="fa-solid fa-box-archive text-amber-400"></i>
+              Deck do Destino (10 Cartas)
+            </h3>
+            <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full font-medium border border-slate-700">
+              Retirada com Reposição
+            </span>
+          </div>
+
+          <!-- Deck Stack Graphic & Draw Button -->
+          <div class="relative py-8 flex flex-col items-center justify-center w-full">
+            <div id="deck-stack" class="relative w-44 h-64 cursor-pointer group" onclick="drawCard()">
+              <div class="absolute inset-0 bg-slate-800 border-2 border-slate-600 rounded-xl transform translate-x-2 translate-y-2 shadow-lg"></div>
+              <div class="absolute inset-0 bg-slate-850 border-2 border-slate-500 rounded-xl transform translate-x-1 translate-y-1 shadow-md"></div>
+              <div class="absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 border-2 border-amber-500/70 rounded-xl shadow-2xl flex flex-col items-center justify-center p-4 group-hover:scale-105 group-hover:border-amber-400 transition-all duration-300">
+                <div class="w-full h-full border border-amber-500/30 rounded-lg flex flex-col items-center justify-center gap-3 bg-slate-950/40 p-2 text-center">
+                  <div class="w-12 h-12 rounded-full border border-amber-400/40 bg-amber-500/10 flex items-center justify-center text-amber-300 text-2xl">
+                    <i class="fa-solid fa-shield-halved"></i>
+                  </div>
+                  <span class="font-fantasy font-black text-amber-400 text-sm tracking-widest uppercase">DECK DO DESTINO</span>
+                  <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">10 Cartas Místicas</p>
+                </div>
+              </div>
+            </div>
+
+            <p id="deck-instruction-text" class="text-xs text-slate-400 mt-4 flex items-center gap-1.5">
+              <i class="fa-solid fa-hand-pointer text-amber-400 animate-bounce"></i>
+              Clique no Deck para sacar 1 carta
+            </p>
+          </div>
+
+          <!-- Controls & Buttons -->
+          <div class="w-full space-y-3">
+            <button id="btn-draw" onclick="drawCard()" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold font-sans text-base shadow-lg shadow-amber-500/25 active:scale-98 transition flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-amber-500">
+              <i class="fa-solid fa-cards text-lg"></i>
+              <span>Sacar Carta do Deck</span>
+            </button>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="autoPlay20()" class="py-2.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 active:scale-95 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-bolt text-yellow-400"></i>
+                <span>Simular 20 Jogadas</span>
+              </button>
+              <button onclick="resetDuel()" class="py-2.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 active:scale-95 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-trash-can text-rose-400"></i>
+                <span>Limpar Ficha</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="w-full pt-3 border-t border-slate-800/80 text-center">
+            <button onclick="openModal('modal-reposicao')" class="text-xs text-amber-400 hover:text-amber-300 underline underline-offset-4 font-medium inline-flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-question"></i>
+              O que é "Retirada com Reposição"?
+            </button>
+          </div>
+        </div>
+
+        <!-- Center/Right Column: Card Arena Display & Drawn Card Details -->
+        <div class="lg:col-span-7 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl relative overflow-hidden">
+          
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-fantasy font-bold text-slate-200 flex items-center gap-2">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+              Carta Retirada na Rodada
+            </h3>
+            <span id="card-rarity-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">
+              Aguardando Saque
+            </span>
+          </div>
+
+          <div class="flex-1 min-h-[380px] flex items-center justify-center my-2 relative">
+            <div id="card-placeholder" class="text-center p-8 border-2 border-dashed border-slate-800 rounded-2xl max-w-sm flex flex-col items-center gap-3">
+              <div class="w-16 h-16 rounded-2xl bg-slate-800/60 flex items-center justify-center text-slate-600 text-3xl">
+                <i class="fa-solid fa-clone"></i>
+              </div>
+              <p class="text-sm font-semibold text-slate-400">Nenhuma carta sorteada nesta rodada.</p>
+              <p class="text-xs text-slate-500">Clique em "Sacar Carta do Deck" para começar o duelo matemático!</p>
+            </div>
+
+            <div id="active-card-container" class="hidden perspective-1000 w-full max-w-[340px]">
+              <div id="card-flip-element" class="transform-style-3d transition-transform duration-500">
+                <div id="drawn-card" class="w-full bg-slate-900 border-4 rounded-xl p-3.5 shadow-2xl flex flex-col justify-between space-y-3 relative overflow-hidden transition-all duration-300">
+                  <!-- Dynamic content populated via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="reposicao-banner" class="opacity-0 transition-opacity duration-500 bg-emerald-950/80 border border-emerald-500/40 rounded-xl p-3 text-xs text-emerald-300 flex items-center gap-3">
+            <i class="fa-solid fa-rotate-right text-emerald-400 text-base animate-spin"></i>
+            <div>
+              <span class="font-bold block">Reposição Concluída!</span>
+              <p class="text-[11px] text-emerald-200/80">A carta foi devolvida ao deck. O espaço amostral continua com exatamente 10 cartas!</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Summary Cards Bar -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-comum-dark/30 border border-comum-light/30 rounded-xl p-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-comum-light/20 border border-comum-light/40 flex items-center justify-center text-comum-light text-xl">
+              <i class="fa-solid fa-leaf"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-100 text-sm">Cartas Comuns</h4>
+              <p class="text-xs text-slate-400">Esperado: 50% (5/10)</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="stat-count-comum" class="text-2xl font-black text-comum-light">0 cartas</span>
+            <span id="stat-percent-comum" class="block text-xs font-semibold text-slate-400 mt-0.5">--</span>
+          </div>
+        </div>
+
+        <div class="bg-rara-dark/30 border border-rara-light/30 rounded-xl p-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-rara-light/20 border border-rara-light/40 flex items-center justify-center text-rara-light text-xl">
+              <i class="fa-solid fa-gem"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-100 text-sm">Cartas Raras</h4>
+              <p class="text-xs text-slate-400">Esperado: 30% (3/10)</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="stat-count-rara" class="text-2xl font-black text-rara-light">0 cartas</span>
+            <span id="stat-percent-rara" class="block text-xs font-semibold text-slate-400 mt-0.5">--</span>
+          </div>
+        </div>
+
+        <div class="bg-especial-dark/30 border border-especial-light/30 rounded-xl p-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-especial-light/20 border border-especial-light/40 flex items-center justify-center text-especial-light text-xl">
+              <i class="fa-solid fa-crown"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-100 text-sm">Cartas Especiais</h4>
+              <p class="text-xs text-slate-400">Esperado: 20% (2/10)</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="stat-count-especial" class="text-2xl font-black text-especial-light">0 cartas</span>
+            <span id="stat-percent-especial" class="block text-xs font-semibold text-slate-400 mt-0.5">--</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: CARTAS DO DECK (GALLERY) -->
+    <section id="tab-deck" class="tab-content hidden flex-1 flex flex-col gap-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
+        <div>
+          <h2 class="font-fantasy font-black text-xl text-amber-300">As 10 Cartas do Deck do Destino</h2>
+          <p class="text-xs text-slate-400 mt-1">Conheça o espaço amostral completo (10 cartas) e suas Missões Matemáticas de sala de aula!</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs px-3 py-1 rounded-lg bg-comum-dark/40 border border-comum-light/30 text-comum-light font-medium">5 Comuns (50%)</span>
+          <span class="text-xs px-3 py-1 rounded-lg bg-rara-dark/40 border border-rara-light/30 text-rara-light font-medium">3 Raras (30%)</span>
+          <span class="text-xs px-3 py-1 rounded-lg bg-especial-dark/40 border border-especial-light/30 text-especial-light font-medium">2 Especiais (20%)</span>
+        </div>
+      </div>
+
+      <div id="deck-gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 3: FICHA DE REGISTRO & GRÁFICOS -->
+    <section id="tab-stats" class="tab-content hidden flex-1 flex flex-col gap-6">
+      <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-amber-500/30 rounded-2xl p-4 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl">
+            <i class="fa-solid fa-id-card"></i>
+          </div>
+          <div>
+            <h4 class="font-fantasy font-bold text-amber-300 text-sm">Ficha Oficial do Duelista</h4>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300 mt-0.5">
+              <span><strong>Aluno:</strong> <span id="ficha-student-name" class="text-amber-200 font-semibold">--</span></span>
+              <span><strong>Turma:</strong> <span id="ficha-student-turma" class="text-amber-200 font-semibold">--</span></span>
+              <span><strong>Data:</strong> <span id="ficha-date" class="text-amber-200 font-mono">--/--/----</span></span>
+            </div>
+          </div>
+        </div>
+        <button onclick="openWelcomeOverlay(true)" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-medium flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-pen-to-square text-amber-400"></i> Editar Dados
+        </button>
+      </div>
+
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col lg:flex-row gap-8">
+        
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-fantasy font-bold text-slate-200 text-lg flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-amber-400"></i>
+              Ficha de Registro das 20 Retiradas
+            </h3>
+            <span class="text-xs text-slate-400 font-medium">Preenchimento Automático</span>
+          </div>
+
+          <div class="overflow-x-auto border border-slate-800 rounded-xl">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="p-3 text-center">Rodada</th>
+                  <th class="p-3">Carta Sorteada</th>
+                  <th class="p-3 text-center">Comum</th>
+                  <th class="p-3 text-center">Rara</th>
+                  <th class="p-3 text-center">Especial</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body" class="divide-y divide-slate-800/60 font-mono">
+                <!-- Dynamically populated 20 rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="w-full lg:w-96 flex flex-col gap-6">
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-5">
+            <h3 class="font-fantasy font-bold text-amber-300 text-base mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-scale-balanced text-amber-400"></i>
+              Esperada vs. Observada
+            </h3>
+
+            <!-- Notice when duel is incomplete -->
+            <div id="stats-incomplete-notice" class="bg-amber-950/40 border border-amber-500/30 rounded-lg p-2.5 mb-3 text-[11px] text-amber-300 flex items-center gap-2">
+              <i class="fa-solid fa-hourglass-half animate-spin text-amber-400"></i>
+              <span>Complete as 20 rodadas para calcular a porcentagem observada final!</span>
+            </div>
+
+            <div class="overflow-hidden border border-slate-800 rounded-lg mb-4">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-slate-900 text-slate-400 font-semibold uppercase">
+                  <tr>
+                    <th class="p-2">Raridade</th>
+                    <th class="p-2 text-center">Esperada (%)</th>
+                    <th class="p-2 text-center">Observada (%)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                  <tr>
+                    <td class="p-2 font-semibold text-comum-light">Comum</td>
+                    <td class="p-2 text-center font-mono">50% (5/10)</td>
+                    <td id="table-obs-comum" class="p-2 text-center font-bold font-mono text-slate-400">--</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2 font-semibold text-rara-light">Rara</td>
+                    <td class="p-2 text-center font-mono">30% (3/10)</td>
+                    <td id="table-obs-rara" class="p-2 text-center font-bold font-mono text-slate-400">--</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2 font-semibold text-especial-light">Especial</td>
+                    <td class="p-2 text-center font-mono">20% (2/10)</td>
+                    <td id="table-obs-especial" class="p-2 text-center font-bold font-mono text-slate-400">--</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="space-y-4 pt-2">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300 font-semibold">Comum (Esperado: 50%)</span>
+                  <span id="bar-text-comum" class="text-slate-400 font-mono font-bold">--</span>
+                </div>
+                <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
+                  <div id="bar-obs-comum" class="bg-comum transition-all duration-500 h-full" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300 font-semibold">Rara (Esperado: 30%)</span>
+                  <span id="bar-text-rara" class="text-slate-400 font-mono font-bold">--</span>
+                </div>
+                <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
+                  <div id="bar-obs-rara" class="bg-rara transition-all duration-500 h-full" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300 font-semibold">Especial (Esperado: 20%)</span>
+                  <span id="bar-text-especial" class="text-slate-400 font-mono font-bold">--</span>
+                </div>
+                <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
+                  <div id="bar-obs-especial" class="bg-especial transition-all duration-500 h-full" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-xs text-slate-300 leading-relaxed space-y-2">
+            <h4 class="font-bold text-amber-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-calculator"></i> Como Calcular?
+            </h4>
+            <p><strong>Probabilidade Esperada (Teórica):</strong> P = Casos Favoráveis ÷ Total de Cartas (10) × 100%.</p>
+            <p><strong>Probabilidade Observada (Prática):</strong> P_obs = Sorteios da Carta ÷ Total de Jogadas (20) × 100%. Cada carta sorteada equivale a exatamente 5%!</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 4: PERGUNTAS DE REFLEXÃO E GABARITO -->
+    <section id="tab-quiz" class="tab-content hidden flex-1 flex flex-col gap-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+          <div class="border-b border-slate-800 pb-4">
+            <h2 class="font-fantasy font-black text-amber-300 text-lg flex items-center gap-2">
+              <i class="fa-solid fa-pen-to-square text-amber-400"></i>
+              Perguntas de Conclusão para Alunos
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Responda após completar as 20 retiradas na Arena!</p>
+          </div>
+
+          <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+            <label class="block text-xs font-semibold text-slate-200">
+              1. A porcentagem de cartas <strong>Comuns</strong> que você tirou na prática foi EXATAMENTE igual aos 50% esperados? Por quê?
+            </label>
+            <textarea id="q1-input" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400" placeholder="Escreva sua explicação aqui..."></textarea>
+            
+            <button onclick="toggleAnswer('ans-1')" class="mt-2 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 hover:text-amber-200 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5 transition active:scale-95 shadow">
+              <i class="fa-solid fa-key"></i> Ver a Resposta
+            </button>
+            
+            <div id="ans-1" class="hidden text-xs bg-slate-900 p-3 rounded-lg border border-slate-700/60 text-slate-300 mt-2">
+              <strong class="text-amber-300 block mb-1">Gabarito:</strong>
+              Não necessariamente. O valor experimental em um pequeno número de tentativas (20 jogadas) varia por causa do acaso/aleatoriedade.
+            </div>
+          </div>
+
+          <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+            <label class="block text-xs font-semibold text-slate-200">
+              2. Qual das raridades foi a mais fácil de ser tirada? Essa constatação bateu com os cálculos da Probabilidade Esperada?
+            </label>
+            <textarea id="q2-input" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400" placeholder="Escreva sua resposta aqui..."></textarea>
+            
+            <button onclick="toggleAnswer('ans-2')" class="mt-2 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 hover:text-amber-200 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5 transition active:scale-95 shadow">
+              <i class="fa-solid fa-key"></i> Ver a Resposta
+            </button>
+
+            <div id="ans-2" class="hidden text-xs bg-slate-900 p-3 rounded-lg border border-slate-700/60 text-slate-300 mt-2">
+              <strong class="text-amber-300 block mb-1">Gabarito:</strong>
+              A carta Comum deve ser a mais frequente na maioria das vezes, pois tem a maior probabilidade esperada (50%).
+            </div>
+          </div>
+
+          <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+            <label class="block text-xs font-semibold text-slate-200">
+              3. Se em vez de 20 retiradas nós fizessemos <strong>200 ou 1000 retiradas</strong>, o resultado observado ficaria MAIS PERTO ou MAIS LONGE do valor esperado?
+            </label>
+            <textarea id="q3-input" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400" placeholder="Escreva sua resposta aqui..."></textarea>
+
+            <button onclick="toggleAnswer('ans-3')" class="mt-2 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 hover:text-amber-200 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5 transition active:scale-95 shadow">
+              <i class="fa-solid fa-key"></i> Ver a Resposta
+            </button>
+
+            <div id="ans-3" class="hidden text-xs bg-slate-900 p-3 rounded-lg border border-slate-700/60 text-slate-300 mt-2">
+              <strong class="text-amber-300 block mb-1">Gabarito:</strong>
+              Ficaria MAIS PERTO. Quanto maior o número de realizações do experimento, mais a probabilidade observada se aproxima da esperada (Lei dos Grandes Números).
+            </div>
+          </div>
+        </div>
+
+        <!-- Teacher's Guide & Pedagogical Tips -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+          <div class="border-b border-slate-800 pb-4">
+            <h2 class="font-fantasy font-black text-yellow-400 text-lg flex items-center gap-2">
+              <i class="fa-solid fa-graduation-cap text-yellow-400"></i>
+              Guia Pedagógico do Professor
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Alinhamento BNCC & Mediação em Sala de Aula</p>
+          </div>
+
+          <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
+            <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+              <h4 class="font-bold text-amber-300 mb-1">🎯 Alinhamento com a BNCC:</h4>
+              <p>Atende às habilidades de Matemática do 6º e 7º ano do Ensino Fundamental no bloco de <em>Probabilidade e Estatística</em> (<strong>EF06MA30</strong> e <strong>EF07MA37</strong>).</p>
+            </div>
+
+            <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+              <h4 class="font-bold text-amber-300 mb-1">💡 Perguntas para Provocar Discussão:</h4>
+              <ul class="list-disc list-inside space-y-1 text-slate-300">
+                <li><em>"Se retirássemos a carta e NÃO a devolvêssemos ao deck, o cálculo da probabilidade mudaria a cada rodada? Por quê?"</em></li>
+                <li><em>"Por que as cartas mais fortes nos jogos reais (Yu-Gi-Oh / Pokémon) são mais difíceis de tirar?"</em></li>
+                <li><em>"Se somarmos os resultados da turma toda (30 alunos x 20 = 600 jogadas), o resultado fica mais próximo do esperado do que o de 1 único aluno?"</em></li>
+              </ul>
+            </div>
+
+            <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+              <h4 class="font-bold text-amber-300 mb-1">🎨 Dimensões e Dica para Canva:</h4>
+              <p>Tamanho padrão de carta de baralho para o Canva: <strong>59 mm x 86 mm</strong> (ou proporção equivalente). Exportar em PDF CMYK para impressão presencial se desejado!</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL: Retirada com Reposição Explanation -->
+  <div id="modal-reposicao" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 relative">
+      <button onclick="closeModal('modal-reposicao')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-100 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl">
+        <i class="fa-solid fa-arrows-rotate"></i>
+      </div>
+
+      <h3 class="font-fantasy font-bold text-amber-300 text-lg">O que é "Retirada com Reposição"?</h3>
+
+      <div class="text-xs text-slate-300 leading-relaxed space-y-2">
+        <p>Imagine que você tem uma caixa com 10 bolinhas coloridas. Se você tira uma bolinha, olha a cor dela e <strong>coloca ela de volta na caixa</strong>, você fez uma <em>retirada com reposição</em>!</p>
+        <p class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-amber-200">
+          Isso é fundamental porque garante que a quantidade total de cartas na caixa continua sempre a mesma (10 cartas). Assim, todas as jogadas têm exatamente as mesmas chances do começo ao fim do jogo!
+        </p>
+      </div>
+
+      <button onclick="closeModal('modal-reposicao')" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">
+        Entendi! Voltar ao jogo
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: Fullscreen Mandatory Entrance Overlay -->
+  <div id="welcome-overlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 transition-all duration-500">
+    <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl shadow-amber-500/10 space-y-6 relative overflow-hidden animate-float">
+      
+      <!-- Decorative Glow -->
+      <div class="absolute -top-16 -right-16 w-36 h-36 bg-amber-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Icon & Header -->
+      <div class="text-center space-y-3">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 to-yellow-400 border border-amber-300/40 mx-auto flex items-center justify-center shadow-lg shadow-amber-500/30 text-slate-950 text-3xl">
+          <i class="fa-solid fa-khanda"></i>
+        </div>
+        <h2 class="font-fantasy font-black text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 uppercase">
+          Bem-vindo à Arena!
+        </h2>
+        <p class="text-xs text-slate-300 font-medium">
+          Antes de duelar, identifique-se, duelista!
+        </p>
+      </div>
+
+      <!-- Form Inputs -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-amber-300 mb-1.5 uppercase tracking-wide">
+            Nome do Aluno <span class="text-rose-400">*</span>
+          </label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3.5 top-3 text-slate-500 text-sm"></i>
+            <input type="text" id="input-student-name" oninput="validateEntranceForm()" placeholder="Ex: Arthur Pendelton" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-600 outline-none transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-amber-300 mb-1.5 uppercase tracking-wide">
+            Turma <span class="text-rose-400">*</span>
+          </label>
+          <div class="relative">
+            <i class="fa-solid fa-users absolute left-3.5 top-3 text-slate-500 text-sm"></i>
+            <input type="text" id="input-student-turma" oninput="validateEntranceForm()" placeholder="Ex: 6º Ano A" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-600 outline-none transition">
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button id="btn-enter-arena" disabled onclick="saveStudentData()" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold font-sans text-sm tracking-wide uppercase shadow-lg shadow-amber-500/20 active:scale-98 transition duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:from-amber-500 flex items-center justify-center gap-2">
+        <span>Entrar na Arena</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+
+      <p class="text-[11px] text-slate-400 text-center italic">
+        Os seus dados serão registrados automaticamente na sua Ficha de Registro de 20 Jogadas.
+      </p>
+
+    </div>
+  </div>
+
+  <script>
+    /* 
+      ========================================================================
+      ARRAY DE CARTAS DO DECK (10 CARTAS COMPLETAS)
+      - Cada carta possui:
+        1. missaoMatematica: Pergunta matemática sem spoiler da resposta
+        2. valorProbabilistico: A resposta exata da pergunta para o botão "Ver Resposta"
+      ========================================================================
+    */
+    const DECK = [
+      {
+        id: 1,
+        nome: "Dragão da Fração",
+        raridade: "Comum",
+        cor: "comum",
+        tipo: "Monstro",
+        atk: 1200,
+        def: 800,
+        efeito: "Aumenta em 200 pontos de ATK para cada fração equivalente no seu campo.",
+        icon: "fa-dragon",
+        bgHex: "#2E7D32",
+        promptImagem: "Yu-Gi-Oh style card art, Dragão da Fração, dragon made of luminous scales shaped like fraction numbers floating in an emerald green sky, digital painting, dramatic lighting, TCG illustration, no text",
+        missaoMatematica: "Se 5 das 10 cartas do deck são Comuns, qual a probabilidade de tirar uma Comum? Calcule em fração e porcentagem.",
+        valorProbabilistico: "5/10 = 50%"
+      },
+      {
+        id: 2,
+        nome: "Mago dos Dados",
+        raridade: "Comum",
+        cor: "comum",
+        tipo: "Monstro",
+        atk: 1000,
+        def: 1000,
+        efeito: "Permite rolar um dado virtual para dobrar sua defesa neste turno.",
+        icon: "fa-hat-wizard",
+        bgHex: "#2E7D32",
+        promptImagem: "Yu-Gi-Oh style card art, Mago dos Dados, young wizard in bright green robe holding a staff topped with a glowing 6-sided die, digital painting, dramatic lighting, TCG illustration, no text",
+        missaoMatematica: "Um dado de 6 faces é rolado. Qual é a probabilidade de sair um número par (2, 4 ou 6)?",
+        valorProbabilistico: "3/6 = 50%"
+      },
+      {
+        id: 3,
+        nome: "Guerreiro Percentual",
+        raridade: "Comum",
+        cor: "comum",
+        tipo: "Monstro",
+        atk: 1400,
+        def: 600,
+        efeito: "Garante 50% de chance de causar dano direto ao oponente.",
+        icon: "fa-percent",
+        bgHex: "#2E7D32",
+        promptImagem: "Yu-Gi-Oh style card art, Guerreiro Percentual, futuristic warrior in green and silver armor with a laser sword shaped like a percentage symbol, digital painting, dramatic lighting, TCG illustration, no text",
+        missaoMatematica: "Se você realizar 10 ataques e a sua chance de acerto é de 50%, quantos acertos são esperados?",
+        valorProbabilistico: "5 acertos (50% de 10)"
+      },
+      {
+        id: 4,
+        nome: "Escudo do Gráfico",
+        raridade: "Comum",
+        cor: "comum",
+        tipo: "Armadilha",
+        atk: null,
+        def: null,
+        efeito: "Bloqueia o próximo ataque inimigo convertendo dano em estatística.",
+        icon: "fa-chart-pie",
+        bgHex: "#2E7D32",
+        promptImagem: "Yu-Gi-Oh style card art, Escudo do Gráfico, large transparent shield projecting a glowing column bar chart, digital painting, dramatic lighting, TCG illustration, no text",
+        missaoMatematica: "No deck de 10 cartas, 3 são Raras. Qual a probabilidade de NÃO tirar uma Rara em uma retirada?",
+        valorProbabilistico: "7/10 = 70%"
+      },
+      {
+        id: 5,
+        nome: "Poção da Média",
+        raridade: "Comum",
+        cor: "comum",
+        tipo: "Magia",
+        atk: null,
+        def: null,
+        efeito: "Soma os pontos de vida dos dois jogadores e divide igualmente entre eles.",
+        icon: "fa-flask-vial",
+        bgHex: "#2E7D32",
+        promptImagem: "Yu-Gi-Oh style card art, Poção da Média, glowing glass flask with bubbling green liquid and floating math equations, digital painting, dramatic lighting, TCG illustration, no text",
+        missaoMatematica: "Calcule a média de ATK dos 5 monstros do deck: (1200 + 1000 + 1400 + 2100 + 3000) ÷ 5.",
+        valorProbabilistico: "Média = 1740 ATK"
+      },
+      {
+        id: 6,
+        nome: "Fênix da Probabilidade",
+        raridade: "Rara",
+        cor: "rara",
+        tipo: "Monstro",
+        atk: 2100,
+        def: 1500,
+        efeito: "Quando destruída, retorna ao deck se a chance da compra for menor que 30%.",
+        icon: "fa-crow",
+        bgHex: "#1565C0",
+        promptImagem: "Yu-Gi-Oh style card art, Fênix da Probabilidade, majestic blue flaming phoenix with wings woven from dice and glowing math charts, digital painting, dramatic lighting, TCG illustration, no text",
+        missaoMatematica: "Em um deck com 10 cartas onde 3 são Raras, qual a probabilidade de tirar uma carta Rara?",
+        valorProbabilistico: "3/10 = 30%"
+      },
+      {
+        id: 7,
+        nome: "Espelho Amostral",
+        raridade: "Rara",
+        cor: "rara",
+        tipo: "Magia",
+        atk: null,
+        def: null,
+        efeito: "Duplica todas as chances favoráveis do seu próximo turno.",
+        icon: "fa-wand-magic-sparkles",
+        bgHex: "#1565C0",
+        promptImagem: "Yu-Gi-Oh style card art, Espelho Amostral, magical rectangular mirror reflecting multiple scenarios in electric blue, digital painting, dramatic lighting, TCG illustration, no text",
+        missaoMatematica: "A carta Espelho Amostral duplica suas chances! Se a chance normal de tirar uma Especial é 2/10, qual será a probabilidade após dobrá-la?",
+        valorProbabilistico: "4/10 = 40%"
+      },
+      {
+        id: 8,
+        nome: "Anuladores de Sorte",
+        raridade: "Rara",
+        cor: "rara",
+        tipo: "Armadilha",
+        atk: null,
+        def: null,
+        efeito: "Cancela o efeito da carta do adversário se ele errar o cálculo percentual.",
+        icon: "fa-shield-cat",
+        bgHex: "#1565C0",
+        promptImagem: "Yu-Gi-Oh style card art, Anuladores de Sorte, two crossed mystic blue chains blocking a glowing energy portal, digital painting, dramatic lighting, TCG illustration, no text",
+        missaoMatematica: "No deck há 5 Comuns, 3 Raras e 2 Especiais. Qual a probabilidade de tirar uma Rara OU uma Especial em 1 saque?",
+        valorProbabilistico: "5/10 = 50%"
+      },
+      {
+        id: 9,
+        nome: "Supremo Imperador do Acaso",
+        raridade: "Especial",
+        cor: "especial",
+        tipo: "Monstro",
+        atk: 3000,
+        def: 2500,
+        efeito: "Domina a arena! Permite fazer duas compras seguidas no próximo turno.",
+        icon: "fa-crown",
+        bgHex: "#FFD700",
+        promptImagem: "Yu-Gi-Oh style card art, Supremo Imperador do Acaso, imposing warrior in glittering golden armor wearing a prism crown holding a golden orb, digital painting, dramatic lighting, TCG illustration, no text",
+        missaoMatematica: "A chance de tirar 1 Especial é 2/10. Qual a probabilidade de tirar 2 Especiais seguidas com reposição?",
+        valorProbabilistico: "2/10 × 2/10 = 4/100 = 4%"
+      },
+      {
+        id: 10,
+        nome: "Milagre da Certeza",
+        raridade: "Especial",
+        cor: "especial",
+        tipo: "Magia",
+        atk: null,
+        def: null,
+        efeito: "Converte qualquer evento incerto em 100% de vitória no turno atual.",
+        icon: "fa-sun",
+        bgHex: "#FFD700",
+        promptImagem: "Yu-Gi-Oh style card art, Milagre da Certeza, beam of golden light from heavens opening a golden spellbook with glowing math symbols, digital painting, dramatic lighting, TCG illustration, no text",
+        missaoMatematica: "Em retiradas sem reposição, qual o número mínimo de retiradas para garantir a retirada de ao menos 1 carta Comum?",
+        valorProbabilistico: "6 retiradas (3 Raras + 2 Especiais + 1 Comum)"
+      }
+    ];
+
+    let currentRound = 0;
+    const MAX_ROUNDS = 20;
+    let history = []; 
+    let counts = { Comum: 0, Rara: 0, Especial: 0 };
+    let studentData = { name: '', turma: '', date: '' };
+
+    function checkExistingStudentData() {
+      try {
+        const saved = localStorage.getItem('duelo_student_data');
+        if (saved) {
+          studentData = JSON.parse(saved);
+        }
+      } catch(e) {
+        // Fallback to memory
+      }
+
+      if (studentData.name && studentData.turma) {
+        updateStudentUI();
+        closeWelcomeOverlay();
+      } else {
+        openWelcomeOverlay(false);
+      }
+    }
+
+    function validateEntranceForm() {
+      const name = document.getElementById('input-student-name').value.trim();
+      const turma = document.getElementById('input-student-turma').value.trim();
+      const btn = document.getElementById('btn-enter-arena');
+
+      btn.disabled = !(name.length > 0 && turma.length > 0);
+    }
+
+    function saveStudentData() {
+      const name = document.getElementById('input-student-name').value.trim();
+      const turma = document.getElementById('input-student-turma').value.trim();
+
+      if (!name || !turma) return;
+
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString('pt-BR');
+
+      studentData = {
+        name: name,
+        turma: turma,
+        date: formattedDate
+      };
+
+      try {
+        localStorage.setItem('duelo_student_data', JSON.stringify(studentData));
+      } catch(e) {
+        // Fallback
+      }
+
+      updateStudentUI();
+      closeWelcomeOverlay();
+      showToast(`Boa sorte, ${studentData.name}! Que a matemática esteja com você.`);
+    }
+
+    function updateStudentUI() {
+      // Update Header Badge
+      const badgeContainer = document.getElementById('header-student-badge');
+      const badgeInfo = document.getElementById('badge-student-info');
+      if (badgeContainer && badgeInfo) {
+        badgeInfo.textContent = `${studentData.name} • ${studentData.turma}`;
+        badgeContainer.classList.remove('hidden');
+      }
+
+      // Update Ficha & Gráficos Tab Header
+      const fichaName = document.getElementById('ficha-student-name');
+      const fichaTurma = document.getElementById('ficha-student-turma');
+      const fichaDate = document.getElementById('ficha-date');
+
+      if (fichaName) fichaName.textContent = studentData.name || '--';
+      if (fichaTurma) fichaTurma.textContent = studentData.turma || '--';
+      if (fichaDate) fichaDate.textContent = studentData.date || new Date().toLocaleDateString('pt-BR');
+    }
+
+    function openWelcomeOverlay(isEditing = false) {
+      const overlay = document.getElementById('welcome-overlay');
+      overlay.classList.remove('opacity-0', 'pointer-events-none');
+
+      if (isEditing && studentData.name) {
+        document.getElementById('input-student-name').value = studentData.name;
+        document.getElementById('input-student-turma').value = studentData.turma;
+        validateEntranceForm();
+      }
+    }
+
+    function closeWelcomeOverlay() {
+      const overlay = document.getElementById('welcome-overlay');
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    /* 
+      Função de Montagem do Deck
+      Garante a composição exata (5 Comuns, 3 Raras, 2 Especiais) do espaço amostral.
+    */
+    function getDeckComposition() {
+      const comuns = DECK.filter(card => card.raridade === "Comum");
+      const raras = DECK.filter(card => card.raridade === "Rara");
+      const especiais = DECK.filter(card => card.raridade === "Especial");
+
+      return [...comuns, ...raras, ...especiais];
+    }
+
+    window.onload = function() {
+      renderDeckGallery();
+      initHistoryTable();
+      updateStatsUI();
+      checkExistingStudentData();
+    };
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60";
+      });
+      const activeNav = document.getElementById('nav-' + tabId);
+      if(activeNav) {
+        activeNav.className = "nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 shadow";
+      }
+
+      document.querySelectorAll('[id^="mob-nav-"]').forEach(btn => {
+        btn.className = "flex-1 py-2.5 font-semibold text-slate-400";
+      });
+      const mobActive = document.getElementById('mob-nav-' + tabId);
+      if(mobActive) {
+        mobActive.className = "flex-1 py-2.5 font-semibold text-amber-400 border-b-2 border-amber-400";
+      }
+    }
+
+    function drawCard() {
+      if (currentRound >= MAX_ROUNDS) {
+        showToast("Você já concluiu as 20 retiradas da rodada! Limpe a ficha para jogar novamente.");
+        return;
+      }
+
+      const deckStack = document.getElementById('deck-stack');
+      deckStack.classList.add('animate-shuffle');
+      
+      setTimeout(() => {
+        deckStack.classList.remove('animate-shuffle');
+
+        const activeDeck = getDeckComposition();
+        const randomIndex = Math.floor(Math.random() * activeDeck.length);
+        const drawn = activeDeck[randomIndex];
+
+        currentRound++;
+        history.push(drawn);
+        counts[drawn.raridade]++;
+
+        renderDrawnCard(drawn);
+        updateHistoryTable();
+        updateStatsUI();
+        triggerReposicaoBanner();
+
+        if (currentRound === MAX_ROUNDS) {
+          handleDuelCompleted();
+        }
+
+      }, 300);
+    }
+
+    function autoPlay20() {
+      resetDuel();
+      const activeDeck = getDeckComposition();
+      
+      for (let i = 0; i < MAX_ROUNDS; i++) {
+        const randomIndex = Math.floor(Math.random() * activeDeck.length);
+        const drawn = activeDeck[randomIndex];
+        currentRound++;
+        history.push(drawn);
+        counts[drawn.raridade]++;
+      }
+      
+      renderDrawnCard(history[history.length - 1]);
+      updateHistoryTable();
+      updateStatsUI();
+      triggerReposicaoBanner();
+      handleDuelCompleted();
+    }
+
+    function resetDuel() {
+      currentRound = 0;
+      history = [];
+      counts = { Comum: 0, Rara: 0, Especial: 0 };
+
+      const btnDraw = document.getElementById('btn-draw');
+      btnDraw.disabled = false;
+
+      document.getElementById('completion-banner').classList.add('hidden');
+      document.getElementById('deck-instruction-text').classList.remove('hidden');
+
+      const badgeContainer = document.getElementById('round-badge-container');
+      badgeContainer.className = "bg-slate-950/80 px-4 py-2.5 rounded-xl border border-slate-800 text-center shrink-0 transition-all duration-300";
+
+      document.getElementById('card-placeholder').classList.remove('hidden');
+      document.getElementById('active-card-container').classList.add('hidden');
+      document.getElementById('card-rarity-badge').textContent = "Aguardando Saque";
+      document.getElementById('card-rarity-badge').className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700";
+
+      initHistoryTable();
+      updateStatsUI();
+    }
+
+    function handleDuelCompleted() {
+      const btnDraw = document.getElementById('btn-draw');
+      btnDraw.disabled = true;
+
+      document.getElementById('completion-banner').classList.remove('hidden');
+      document.getElementById('deck-instruction-text').classList.add('hidden');
+
+      const badgeContainer = document.getElementById('round-badge-container');
+      badgeContainer.className = "bg-amber-950/90 border-2 border-amber-400 px-4 py-2.5 rounded-xl text-center shrink-0 animate-victory-glow";
+    }
+
+    /* 
+      ========================================================================
+      renderDrawnCard(card)
+      Exibe a carta sorteada na Arena com botão para revelar resposta sem spoiler
+      ========================================================================
+    */
+    function renderDrawnCard(card) {
+      document.getElementById('card-placeholder').classList.add('hidden');
+      const container = document.getElementById('active-card-container');
+      container.classList.remove('hidden');
+
+      const cardElem = document.getElementById('drawn-card');
+      
+      let borderClass = "border-emerald-500 glow-comum";
+      let badgeBg = "bg-emerald-900/80 text-emerald-300 border-emerald-500/50";
+      if (card.raridade === "Rara") {
+        borderClass = "border-blue-500 glow-rara";
+        badgeBg = "bg-blue-900/80 text-blue-300 border-blue-500/50";
+      } else if (card.raridade === "Especial") {
+        borderClass = "border-amber-400 glow-especial";
+        badgeBg = "bg-amber-900/80 text-yellow-300 border-amber-400/50";
+      }
+
+      cardElem.className = `w-full bg-slate-950 border-4 ${borderClass} rounded-2xl p-4 shadow-2xl flex flex-col justify-between space-y-3 relative overflow-hidden`;
+
+      cardElem.innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="font-fantasy font-extrabold text-sm text-slate-100 uppercase tracking-wide">${card.nome}</span>
+          <span class="text-[10px] px-2 py-0.5 rounded font-black uppercase border ${badgeBg}">${card.raridade}</span>
+        </div>
+
+        <div class="h-28 bg-gradient-to-b from-slate-900 to-slate-950 rounded-xl border border-slate-800 flex items-center justify-center relative overflow-hidden">
+          <i class="fa-solid ${card.icon} text-5xl opacity-80" style="color: ${card.bgHex}"></i>
+          <span class="absolute bottom-1.5 right-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-900/90 px-2 py-0.5 rounded border border-slate-800">
+            [${card.tipo}]
+          </span>
+        </div>
+
+        <!-- Efeito da Carta -->
+        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center">
+          <p class="leading-tight"><strong class="text-slate-100">Efeito:</strong> ${card.efeito}</p>
+        </div>
+
+        <!-- Missão Matemática para o Quadro -->
+        <div class="bg-amber-950/30 border-2 border-dashed border-amber-500/60 p-2.5 rounded-xl text-xs text-amber-200 flex items-start gap-2 shadow-inner">
+          <i class="fa-solid fa-calculator text-amber-400 text-sm mt-0.5 shrink-0"></i>
+          <div>
+            <span class="font-bold text-amber-300 block uppercase text-[10px] tracking-wider mb-0.5">Desafio no Quadro:</span>
+            <p class="leading-tight font-medium">${card.missaoMatematica}</p>
+          </div>
+        </div>
+
+        <!-- Atributos & Botão de Resposta no Rodapé -->
+        <div class="flex items-center justify-between pt-1">
+          ${card.tipo === 'Monstro' ? `
+            <div class="flex items-center gap-2 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 font-mono text-xs font-black">
+              <span class="text-amber-400">ATK ${card.atk}</span>
+              <span class="text-blue-400">DEF ${card.def}</span>
+            </div>
+          ` : '<div></div>'}
+
+          <!-- Selo Probabilístico Oculto por Padrão -->
+          <div class="flex items-center">
+            <button id="card-prob-btn" onclick="toggleCardAnswer()" class="flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 px-2.5 py-1 rounded-lg text-amber-300 font-mono font-bold text-xs shadow transition active:scale-95">
+              <i class="fa-solid fa-eye text-amber-400"></i>
+              <span>Ver Resposta</span>
+            </button>
+            <button id="card-prob-val" onclick="toggleCardAnswer()" class="hidden flex items-center gap-1.5 bg-amber-500/20 border border-amber-400/60 px-2.5 py-1 rounded-lg text-amber-300 font-mono font-bold text-xs shadow hover:bg-amber-500/30 transition">
+              <i class="fa-solid fa-dice text-amber-400"></i>
+              <span>Resposta: ${card.valorProbabilistico}</span>
+              <i class="fa-solid fa-eye-slash text-amber-400/70 ml-1 text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      `;
+
+      const badgeElem = document.getElementById('card-rarity-badge');
+      badgeElem.textContent = `${card.raridade} • Rodada ${currentRound}`;
+      badgeElem.className = `px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${badgeBg}`;
+    }
+
+    function triggerReposicaoBanner() {
+      const banner = document.getElementById('reposicao-banner');
+      banner.classList.remove('opacity-0');
+      setTimeout(() => {
+        banner.classList.add('opacity-0');
+      }, 2500);
+    }
+
+    function updateStatsUI() {
+      document.getElementById('round-counter-badge').textContent = `${currentRound} / ${MAX_ROUNDS}`;
+
+      document.getElementById('stat-count-comum').textContent = `${counts.Comum} ${counts.Comum === 1 ? 'carta' : 'cartas'}`;
+      document.getElementById('stat-count-rara').textContent = `${counts.Rara} ${counts.Rara === 1 ? 'carta' : 'cartas'}`;
+      document.getElementById('stat-count-especial').textContent = `${counts.Especial} ${counts.Especial === 1 ? 'carta' : 'cartas'}`;
+
+      const isCompleted = currentRound === MAX_ROUNDS;
+
+      if (isCompleted) {
+        const pComum = Math.round((counts.Comum / 20) * 100);
+        const pRara = Math.round((counts.Rara / 20) * 100);
+        const pEspecial = Math.round((counts.Especial / 20) * 100);
+
+        const notice = document.getElementById('stats-incomplete-notice');
+        if (notice) notice.classList.add('hidden');
+
+        document.getElementById('stat-percent-comum').textContent = `${pComum}% observado`;
+        document.getElementById('stat-percent-rara').textContent = `${pRara}% observado`;
+        document.getElementById('stat-percent-especial').textContent = `${pEspecial}% observado`;
+
+        document.getElementById('table-obs-comum').textContent = `${pComum}% (${counts.Comum}/20)`;
+        document.getElementById('table-obs-comum').className = "p-2 text-center font-bold font-mono text-comum-light";
+
+        document.getElementById('table-obs-rara').textContent = `${pRara}% (${counts.Rara}/20)`;
+        document.getElementById('table-obs-rara').className = "p-2 text-center font-bold font-mono text-rara-light";
+
+        document.getElementById('table-obs-especial').textContent = `${pEspecial}% (${counts.Especial}/20)`;
+        document.getElementById('table-obs-especial').className = "p-2 text-center font-bold font-mono text-especial-light";
+
+        document.getElementById('bar-obs-comum').style.width = `${pComum}%`;
+        document.getElementById('bar-text-comum').textContent = `${pComum}%`;
+
+        document.getElementById('bar-obs-rara').style.width = `${pRara}%`;
+        document.getElementById('bar-text-rara').textContent = `${pRara}%`;
+
+        document.getElementById('bar-obs-especial').style.width = `${pEspecial}%`;
+        document.getElementById('bar-text-especial').textContent = `${pEspecial}%`;
+      } else {
+        const notice = document.getElementById('stats-incomplete-notice');
+        if (notice) notice.classList.remove('hidden');
+
+        document.getElementById('stat-percent-comum').textContent = `(Em andamento)`;
+        document.getElementById('stat-percent-rara').textContent = `(Em andamento)`;
+        document.getElementById('stat-percent-especial').textContent = `(Em andamento)`;
+
+        document.getElementById('table-obs-comum').textContent = "--";
+        document.getElementById('table-obs-comum').className = "p-2 text-center font-bold font-mono text-slate-400";
+
+        document.getElementById('table-obs-rara').textContent = "--";
+        document.getElementById('table-obs-rara').className = "p-2 text-center font-bold font-mono text-slate-400";
+
+        document.getElementById('table-obs-especial').textContent = "--";
+        document.getElementById('table-obs-especial').className = "p-2 text-center font-bold font-mono text-slate-400";
+
+        document.getElementById('bar-obs-comum').style.width = `0%`;
+        document.getElementById('bar-text-comum').textContent = `--`;
+
+        document.getElementById('bar-obs-rara').style.width = `0%`;
+        document.getElementById('bar-text-rara').textContent = `--`;
+
+        document.getElementById('bar-obs-especial').style.width = `0%`;
+        document.getElementById('bar-text-especial').textContent = `--`;
+      }
+    }
+
+    function initHistoryTable() {
+      const tbody = document.getElementById('history-table-body');
+      tbody.innerHTML = '';
+
+      for (let i = 1; i <= MAX_ROUNDS; i++) {
+        const tr = document.createElement('tr');
+        tr.id = `row-round-${i}`;
+        tr.className = "hover:bg-slate-900/50 transition-colors";
+        tr.innerHTML = `
+          <td class="p-2.5 text-center font-bold text-slate-400">${i}</td>
+          <td id="cell-name-${i}" class="p-2.5 text-slate-500 italic">-- Aguardando --</td>
+          <td id="cell-comum-${i}" class="p-2.5 text-center text-slate-600">-</td>
+          <td id="cell-rara-${i}" class="p-2.5 text-center text-slate-600">-</td>
+          <td id="cell-especial-${i}" class="p-2.5 text-center text-slate-600">-</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function updateHistoryTable() {
+      for (let i = 1; i <= MAX_ROUNDS; i++) {
+        const nameCell = document.getElementById(`cell-name-${i}`);
+        const comumCell = document.getElementById(`cell-comum-${i}`);
+        const raraCell = document.getElementById(`cell-rara-${i}`);
+        const especialCell = document.getElementById(`cell-especial-${i}`);
+
+        if (i <= history.length) {
+          const card = history[i - 1];
+          nameCell.textContent = card.nome;
+          nameCell.className = "p-2.5 font-semibold text-slate-200";
+
+          comumCell.innerHTML = card.raridade === 'Comum' ? '<i class="fa-solid fa-check text-comum-light font-black text-sm"></i>' : '';
+          raraCell.innerHTML = card.raridade === 'Rara' ? '<i class="fa-solid fa-check text-rara-light font-black text-sm"></i>' : '';
+          especialCell.innerHTML = card.raridade === 'Especial' ? '<i class="fa-solid fa-check text-especial-light font-black text-sm"></i>' : '';
+        } else {
+          nameCell.textContent = "-- Aguardando --";
+          nameCell.className = "p-2.5 text-slate-500 italic";
+          comumCell.textContent = "-";
+          raraCell.textContent = "-";
+          especialCell.textContent = "-";
+        }
+      }
+    }
+
+    /* 
+      ========================================================================
+      renderDeckGallery()
+      Exibe as 10 cartas na aba "Deck de 10 Cartas" com botões de resposta ocultos
+      ========================================================================
+    */
+    function renderDeckGallery() {
+      const gallery = document.getElementById('deck-gallery-grid');
+      gallery.innerHTML = '';
+
+      DECK.forEach(card => {
+        let borderClass = "border-emerald-500/80";
+        let badgeBg = "bg-emerald-900/80 text-emerald-300 border-emerald-500/50";
+        if (card.raridade === "Rara") {
+          borderClass = "border-blue-500/80";
+          badgeBg = "bg-blue-900/80 text-blue-300 border-blue-500/50";
+        } else if (card.raridade === "Especial") {
+          borderClass = "border-amber-400/80";
+          badgeBg = "bg-amber-900/80 text-yellow-300 border-amber-400/50";
+        }
+
+        const cardBox = document.createElement('div');
+        cardBox.className = `bg-slate-950 border-2 ${borderClass} rounded-2xl p-3 shadow-xl flex flex-col justify-between space-y-2 hover:scale-102 transition duration-200`;
+
+        cardBox.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+            <span class="font-fantasy font-bold text-xs text-slate-100 uppercase truncate max-w-[120px]">${card.nome}</span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded font-black uppercase border ${badgeBg}">${card.raridade}</span>
+          </div>
+
+          <div class="h-20 bg-slate-900/80 rounded-lg border border-slate-800 flex items-center justify-center relative">
+            <i class="fa-solid ${card.icon} text-3xl" style="color: ${card.bgHex}"></i>
+            <span class="absolute bottom-1 right-1 text-[9px] font-bold text-slate-400 uppercase bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+              ${card.tipo}
+            </span>
+          </div>
+
+          <p class="text-[10px] text-slate-300 leading-tight bg-slate-900/50 p-2 rounded-lg border border-slate-800/80 min-h-[38px]">
+            ${card.efeito}
+          </p>
+
+          <!-- Caixa Compacta de Missão Matemática -->
+          <div class="bg-amber-950/20 border border-dashed border-amber-500/40 p-2 rounded text-[10px] text-amber-200/90 flex gap-1.5 items-start">
+            <i class="fa-solid fa-ruler-combined text-amber-400 text-xs mt-0.5 shrink-0"></i>
+            <span class="leading-tight">${card.missaoMatematica}</span>
+          </div>
+
+          <!-- Rodapé com Atributos & Botão de Resposta -->
+          <div class="flex items-center justify-between pt-1 border-t border-slate-800/80 font-mono text-[10px]">
+            ${card.tipo === 'Monstro' ? `
+              <span class="text-amber-400 font-bold">ATK ${card.atk}</span>
+            ` : '<span class="text-slate-500 font-medium">Efeito</span>'}
+
+            <!-- Botão de Revelar Resposta na Galeria do Deck -->
+            <div class="flex items-center">
+              <button id="gallery-btn-${card.id}" onclick="toggleGalleryAnswer(${card.id})" class="text-amber-300 font-bold bg-amber-500/20 hover:bg-amber-500/30 px-2 py-0.5 rounded border border-amber-500/40 transition active:scale-95 flex items-center gap-1">
+                <i class="fa-solid fa-eye text-[9px]"></i>
+                <span>Ver Resposta</span>
+              </button>
+              <button id="gallery-ans-${card.id}" onclick="toggleGalleryAnswer(${card.id})" class="hidden text-amber-300 font-bold bg-amber-500/20 px-2 py-0.5 rounded border border-amber-400/60 flex items-center gap-1">
+                <span>Resposta: ${card.valorProbabilistico}</span>
+                <i class="fa-solid fa-eye-slash text-[9px] text-amber-400/70"></i>
+              </button>
+            </div>
+          </div>
+        `;
+
+        gallery.appendChild(cardBox);
+      });
+    }
+
+    function toggleAnswer(id) {
+      const el = document.getElementById(id);
+      const btn = event.currentTarget;
+      
+      el.classList.toggle('hidden');
+      
+      if (el.classList.contains('hidden')) {
+        btn.innerHTML = '<i class="fa-solid fa-key"></i> Ver a Resposta';
+        btn.className = "mt-2 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 hover:text-amber-200 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5 transition active:scale-95 shadow";
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Ocultar Resposta';
+        btn.className = "mt-2 px-3 py-1.5 rounded-lg bg-slate-700/40 hover:bg-slate-700/60 border border-slate-500/50 text-slate-300 hover:text-slate-100 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5 transition active:scale-95 shadow";
+      }
+    }
+
+    function toggleCardAnswer() {
+      const btn = document.getElementById('card-prob-btn');
+      const val = document.getElementById('card-prob-val');
+      if (btn && val) {
+        btn.classList.toggle('hidden');
+        val.classList.toggle('hidden');
+      }
+    }
+
+    function toggleGalleryAnswer(id) {
+      const btn = document.getElementById(`gallery-btn-${id}`);
+      const ans = document.getElementById(`gallery-ans-${id}`);
+      if (btn && ans) {
+        btn.classList.toggle('hidden');
+        ans.classList.toggle('hidden');
+      }
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = "fixed bottom-6 right-6 bg-amber-500 text-slate-950 px-4 py-3 rounded-xl font-bold text-xs shadow-2xl z-50 transition-all duration-300 animate-bounce";
+      toast.innerHTML = `<i class="fa-solid fa-circle-info mr-2"></i> ${msg}`;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
