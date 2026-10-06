@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR" class="h-full bg-slate-950 text-slate-100">
 <head>
@@ -31,7 +32,6 @@
             'float': 'float 3s ease-in-out infinite',
             'pulse-glow': 'pulseGlow 2s infinite',
             'shuffle': 'shuffle 0.6s ease-in-out',
-            'flip': 'flipCard 0.8s ease-out forwards',
             'victory-glow': 'victoryGlow 1.5s ease-in-out infinite alternate',
           },
           keyframes: {
@@ -49,10 +49,6 @@
               '50%': { transform: 'translateX(30px) rotate(10deg)' },
               '75%': { transform: 'translateX(-15px) rotate(-5deg)' },
               '100%': { transform: 'translateX(0) rotate(0deg)' }
-            },
-            flipCard: {
-              '0%': { transform: 'rotateY(180deg) scale(0.8)' },
-              '100%': { transform: 'rotateY(0deg) scale(1)' }
             },
             victoryGlow: {
               '0%': { boxShadow: '0 0 15px rgba(250, 204, 21, 0.4)', transform: 'scale(1)' },
@@ -72,12 +68,24 @@
 
     .perspective-1000 { perspective: 1000px; }
     .transform-style-3d { transform-style: preserve-3d; }
-    .backface-hidden { backface-visibility: hidden; }
-    .rotate-y-180 { transform: rotateY(180deg); }
 
-    .glow-comum { box-shadow: 0 0 20px rgba(46, 125, 50, 0.6); }
-    .glow-rara { box-shadow: 0 0 25px rgba(21, 101, 192, 0.7); }
-    .glow-especial { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+    .glow-comum { box-shadow: 0 0 25px rgba(74, 222, 128, 0.4); }
+    .glow-rara { box-shadow: 0 0 25px rgba(96, 165, 250, 0.5); }
+    .glow-especial { box-shadow: 0 0 30px rgba(250, 204, 21, 0.6); }
+
+    /* Sunburst / Ray background effects matching card graphics */
+    .ray-bg-comum {
+      background: radial-gradient(circle, #22c55e 0%, #15803d 50%, #052e16 100%);
+      background-image: repeating-conic-gradient(#16a34a 0 15deg, #15803d 15deg 30deg);
+    }
+    .ray-bg-rara {
+      background: radial-gradient(circle, #3b82f6 0%, #1d4ed8 50%, #172554 100%);
+      background-image: repeating-conic-gradient(#2563eb 0 15deg, #1d4ed8 15deg 30deg);
+    }
+    .ray-bg-especial {
+      background: radial-gradient(circle, #f59e0b 0%, #b45309 50%, #451a03 100%);
+      background-image: repeating-conic-gradient(#d97706 0 15deg, #b45309 15deg 30deg);
+    }
 
     .arena-bg {
       background-image: 
@@ -215,12 +223,12 @@
 
           <!-- Deck Stack Graphic & Draw Button -->
           <div class="relative py-8 flex flex-col items-center justify-center w-full">
-            <div id="deck-stack" class="relative w-44 h-64 cursor-pointer group" onclick="drawCard()">
+            <div id="deck-stack" class="relative w-48 h-68 cursor-pointer group" onclick="drawCard()">
               <div class="absolute inset-0 bg-slate-800 border-2 border-slate-600 rounded-xl transform translate-x-2 translate-y-2 shadow-lg"></div>
               <div class="absolute inset-0 bg-slate-850 border-2 border-slate-500 rounded-xl transform translate-x-1 translate-y-1 shadow-md"></div>
               <div class="absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 border-2 border-amber-500/70 rounded-xl shadow-2xl flex flex-col items-center justify-center p-4 group-hover:scale-105 group-hover:border-amber-400 transition-all duration-300">
                 <div class="w-full h-full border border-amber-500/30 rounded-lg flex flex-col items-center justify-center gap-3 bg-slate-950/40 p-2 text-center">
-                  <div class="w-12 h-12 rounded-full border border-amber-400/40 bg-amber-500/10 flex items-center justify-center text-amber-300 text-2xl">
+                  <div class="w-14 h-14 rounded-full border border-amber-400/40 bg-amber-500/10 flex items-center justify-center text-amber-300 text-3xl">
                     <i class="fa-solid fa-shield-halved"></i>
                   </div>
                   <span class="font-fantasy font-black text-amber-400 text-sm tracking-widest uppercase">DECK DO DESTINO</span>
@@ -275,7 +283,7 @@
             </span>
           </div>
 
-          <div class="flex-1 min-h-[380px] flex items-center justify-center my-2 relative">
+          <div class="flex-1 min-h-[400px] flex items-center justify-center my-2 relative">
             <div id="card-placeholder" class="text-center p-8 border-2 border-dashed border-slate-800 rounded-2xl max-w-sm flex flex-col items-center gap-3">
               <div class="w-16 h-16 rounded-2xl bg-slate-800/60 flex items-center justify-center text-slate-600 text-3xl">
                 <i class="fa-solid fa-clone"></i>
@@ -284,10 +292,10 @@
               <p class="text-xs text-slate-500">Clique em "Sacar Carta do Deck" para começar o duelo matemático!</p>
             </div>
 
-            <div id="active-card-container" class="hidden perspective-1000 w-full max-w-[340px]">
+            <div id="active-card-container" class="hidden perspective-1000 w-full max-w-[360px]">
               <div id="card-flip-element" class="transform-style-3d transition-transform duration-500">
-                <div id="drawn-card" class="w-full bg-slate-900 border-4 rounded-xl p-3.5 shadow-2xl flex flex-col justify-between space-y-3 relative overflow-hidden transition-all duration-300">
-                  <!-- Dynamic content populated via JS -->
+                <div id="drawn-card" class="w-full bg-slate-950 border-4 rounded-2xl p-4 shadow-2xl flex flex-col justify-between space-y-3 relative overflow-hidden transition-all duration-300">
+                  <!-- Dynamic card content -->
                 </div>
               </div>
             </div>
@@ -309,7 +317,7 @@
         <div class="bg-comum-dark/30 border border-comum-light/30 rounded-xl p-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-comum-light/20 border border-comum-light/40 flex items-center justify-center text-comum-light text-xl">
-              <i class="fa-solid fa-leaf"></i>
+              <i class="fa-solid fa-kit-medical"></i>
             </div>
             <div>
               <h4 class="font-bold text-slate-100 text-sm">Cartas Comuns</h4>
@@ -699,160 +707,208 @@
   <script>
     /* 
       ========================================================================
-      ARRAY DE CARTAS DO DECK (10 CARTAS COMPLETAS)
-      - Cada carta possui:
-        1. missaoMatematica: Pergunta matemática sem spoiler da resposta
-        2. valorProbabilistico: A resposta exata da pergunta para o botão "Ver Resposta"
+      ARRAY DE CARTAS DO DECK (10 CARTAS COM ILUSTRAÇÕES VETORIAIS SVG E CORES DE MOLDURA)
       ========================================================================
     */
     const DECK = [
       {
         id: 1,
-        nome: "Dragão da Fração",
+        nome: "Kit de Socorros",
         raridade: "Comum",
         cor: "comum",
-        tipo: "Monstro",
+        tipo: "Equipamento",
         atk: 1200,
         def: 800,
-        efeito: "Aumenta em 200 pontos de ATK para cada fração equivalente no seu campo.",
-        icon: "fa-dragon",
-        bgHex: "#2E7D32",
-        promptImagem: "Yu-Gi-Oh style card art, Dragão da Fração, dragon made of luminous scales shaped like fraction numbers floating in an emerald green sky, digital painting, dramatic lighting, TCG illustration, no text",
-        missaoMatematica: "Se 5 das 10 cartas do deck são Comuns, qual a probabilidade de tirar uma Comum? Calcule em fração e porcentagem.",
+        efeito: "Recupera pontos vitais e fortalece o campo em situações de emergência.",
+        svgIcon: `<svg class="w-16 h-16 drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="20" width="48" height="36" rx="6" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
+          <path d="M22 20V14C22 11.7909 23.7909 10 26 10H38C40.2091 10 42 11.7909 42 14V20" stroke="#f87171" stroke-width="3" stroke-linecap="round"/>
+          <rect x="28" y="28" width="8" height="20" rx="2" fill="#ffffff"/>
+          <rect x="22" y="34" width="20" height="8" rx="2" fill="#ffffff"/>
+          <rect x="8" y="32" width="48" height="2" fill="#b91c1c"/>
+        </svg>`,
+        bgStyle: "ray-bg-comum",
+        borderHex: "#22c55e",
+        missaoMatematica: "Se 5 das 10 cartas do deck são Comuns, qual a probabilidade de tirar uma Comum? Responda em fração e porcentagem.",
         valorProbabilistico: "5/10 = 50%"
       },
       {
         id: 2,
-        nome: "Mago dos Dados",
+        nome: "Lanterna Tática",
         raridade: "Comum",
         cor: "comum",
-        tipo: "Monstro",
+        tipo: "Equipamento",
         atk: 1000,
         def: 1000,
-        efeito: "Permite rolar um dado virtual para dobrar sua defesa neste turno.",
-        icon: "fa-hat-wizard",
-        bgHex: "#2E7D32",
-        promptImagem: "Yu-Gi-Oh style card art, Mago dos Dados, young wizard in bright green robe holding a staff topped with a glowing 6-sided die, digital painting, dramatic lighting, TCG illustration, no text",
+        efeito: "Emite um feixe de luz que revela armadilhas ocultas na escuridão.",
+        svgIcon: `<svg class="w-16 h-16 drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 28L20 22H36L42 28V36L36 42H20L12 36V28Z" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+          <rect x="36" y="24" width="16" height="16" rx="2" fill="#facc15" stroke="#eab308" stroke-width="2"/>
+          <path d="M52 20L62 14M52 32L64 32M52 44L62 50" stroke="#fef08a" stroke-width="3" stroke-linecap="round"/>
+          <rect x="18" y="28" width="12" height="8" rx="1" fill="#475569"/>
+        </svg>`,
+        bgStyle: "ray-bg-comum",
+        borderHex: "#22c55e",
         missaoMatematica: "Um dado de 6 faces é rolado. Qual é a probabilidade de sair um número par (2, 4 ou 6)?",
         valorProbabilistico: "3/6 = 50%"
       },
       {
         id: 3,
-        nome: "Guerreiro Percentual",
+        nome: "Capacete de Proteção",
         raridade: "Comum",
         cor: "comum",
-        tipo: "Monstro",
+        tipo: "Equipamento",
         atk: 1400,
         def: 600,
-        efeito: "Garante 50% de chance de causar dano direto ao oponente.",
-        icon: "fa-percent",
-        bgHex: "#2E7D32",
-        promptImagem: "Yu-Gi-Oh style card art, Guerreiro Percentual, futuristic warrior in green and silver armor with a laser sword shaped like a percentage symbol, digital painting, dramatic lighting, TCG illustration, no text",
+        efeito: "Reduz o dano sofrido contra ataques diretos no duelo.",
+        svgIcon: `<svg class="w-16 h-16 drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 36C10 21.6406 21.6406 10 36 10C50.3594 10 62 21.6406 62 36V42H10V36Z" fill="#15803d" stroke="#14532d" stroke-width="2"/>
+          <rect x="6" y="42" width="52" height="6" rx="3" fill="#334155"/>
+          <path d="M16 26C20 20 28 16 36 16" stroke="#4ade80" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="36" cy="30" r="4" fill="#facc15"/>
+        </svg>`,
+        bgStyle: "ray-bg-comum",
+        borderHex: "#22c55e",
         missaoMatematica: "Se você realizar 10 ataques e a sua chance de acerto é de 50%, quantos acertos são esperados?",
         valorProbabilistico: "5 acertos (50% de 10)"
       },
       {
         id: 4,
-        nome: "Escudo do Gráfico",
+        nome: "Garrafa de Energia",
         raridade: "Comum",
         cor: "comum",
-        tipo: "Armadilha",
+        tipo: "Suprimento",
         atk: null,
         def: null,
-        efeito: "Bloqueia o próximo ataque inimigo convertendo dano em estatística.",
-        icon: "fa-chart-pie",
-        bgHex: "#2E7D32",
-        promptImagem: "Yu-Gi-Oh style card art, Escudo do Gráfico, large transparent shield projecting a glowing column bar chart, digital painting, dramatic lighting, TCG illustration, no text",
+        efeito: "Restaura instantaneamente o vigor do seu monstro em batalha.",
+        svgIcon: `<svg class="w-16 h-16 drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="22" y="10" width="20" height="8" rx="2" fill="#0284c7"/>
+          <path d="M18 22C18 19.7909 19.7909 18 22 18H42C44.2091 18 46 19.7909 46 22V52C46 56.4183 42.4183 60 38 60H26C21.5817 60 18 56.4183 18 52V22Z" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
+          <path d="M34 26L26 40H34L30 52L40 36H32L34 26Z" fill="#facc15" stroke="#ca8a04" stroke-width="1"/>
+        </svg>`,
+        bgStyle: "ray-bg-comum",
+        borderHex: "#22c55e",
         missaoMatematica: "No deck de 10 cartas, 3 são Raras. Qual a probabilidade de NÃO tirar uma Rara em uma retirada?",
         valorProbabilistico: "7/10 = 70%"
       },
       {
         id: 5,
-        nome: "Poção da Média",
+        nome: "Caixa de Suprimentos",
         raridade: "Comum",
         cor: "comum",
-        tipo: "Magia",
+        tipo: "Suprimento",
         atk: null,
         def: null,
-        efeito: "Soma os pontos de vida dos dois jogadores e divide igualmente entre eles.",
-        icon: "fa-flask-vial",
-        bgHex: "#2E7D32",
-        promptImagem: "Yu-Gi-Oh style card art, Poção da Média, glowing glass flask with bubbling green liquid and floating math equations, digital painting, dramatic lighting, TCG illustration, no text",
+        efeito: "Armazena recursos estratégicos para serem usados nas rodadas finais.",
+        svgIcon: `<svg class="w-16 h-16 drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="16" width="48" height="40" rx="4" fill="#78350f" stroke="#451a03" stroke-width="2"/>
+          <path d="M8 16L32 30L56 16" stroke="#b45309" stroke-width="3"/>
+          <line x1="8" y1="36" x2="56" y2="36" stroke="#451a03" stroke-width="3"/>
+          <rect x="26" y="30" width="12" height="12" rx="2" fill="#facc15" stroke="#78350f" stroke-width="2"/>
+        </svg>`,
+        bgStyle: "ray-bg-comum",
+        borderHex: "#22c55e",
         missaoMatematica: "Calcule a média de ATK dos 5 monstros do deck: (1200 + 1000 + 1400 + 2100 + 3000) ÷ 5.",
         valorProbabilistico: "Média = 1740 ATK"
       },
       {
         id: 6,
-        nome: "Fênix da Probabilidade",
+        nome: "Mochila Tática",
         raridade: "Rara",
         cor: "rara",
-        tipo: "Monstro",
+        tipo: "Equipamento",
         atk: 2100,
         def: 1500,
-        efeito: "Quando destruída, retorna ao deck se a chance da compra for menor que 30%.",
-        icon: "fa-crow",
-        bgHex: "#1565C0",
-        promptImagem: "Yu-Gi-Oh style card art, Fênix da Probabilidade, majestic blue flaming phoenix with wings woven from dice and glowing math charts, digital painting, dramatic lighting, TCG illustration, no text",
+        efeito: "Permite carregar até duas ferramentas adicionais no seu inventário de campo.",
+        svgIcon: `<svg class="w-16 h-16 drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="18" width="36" height="38" rx="8" fill="#1e293b" stroke="#0f172a" stroke-width="2"/>
+          <rect x="18" y="28" width="28" height="14" rx="4" fill="#f97316"/>
+          <rect x="22" y="46" width="20" height="8" rx="2" fill="#334155"/>
+          <path d="M22 18V12C22 9.79086 23.7909 8 26 8H38C40.2091 8 42 9.79086 42 12V18" stroke="#3b82f6" stroke-width="3"/>
+        </svg>`,
+        bgStyle: "ray-bg-rara",
+        borderHex: "#3b82f6",
         missaoMatematica: "Em um deck com 10 cartas onde 3 são Raras, qual a probabilidade de tirar uma carta Rara?",
         valorProbabilistico: "3/10 = 30%"
       },
       {
         id: 7,
-        nome: "Espelho Amostral",
+        nome: "Mapa & Bússola",
         raridade: "Rara",
         cor: "rara",
-        tipo: "Magia",
+        tipo: "Navegação",
         atk: null,
         def: null,
-        efeito: "Duplica todas as chances favoráveis do seu próximo turno.",
-        icon: "fa-wand-magic-sparkles",
-        bgHex: "#1565C0",
-        promptImagem: "Yu-Gi-Oh style card art, Espelho Amostral, magical rectangular mirror reflecting multiple scenarios in electric blue, digital painting, dramatic lighting, TCG illustration, no text",
+        efeito: "Garante orientação precisa, dobrando suas escolhas estratégicas.",
+        svgIcon: `<svg class="w-16 h-16 drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 16L24 10L40 18L54 12V50L40 56L24 48L10 54V16Z" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+          <path d="M24 10V48M40 18V56" stroke="#eab308" stroke-width="2" stroke-dasharray="3 3"/>
+          <circle cx="42" cy="34" r="12" fill="#0284c7" stroke="#0369a1" stroke-width="2"/>
+          <path d="M42 26L45 34L42 42L39 34L42 26Z" fill="#ef4444"/>
+        </svg>`,
+        bgStyle: "ray-bg-rara",
+        borderHex: "#3b82f6",
         missaoMatematica: "A carta Espelho Amostral duplica suas chances! Se a chance normal de tirar uma Especial é 2/10, qual será a probabilidade após dobrá-la?",
         valorProbabilistico: "4/10 = 40%"
       },
       {
         id: 8,
-        nome: "Anuladores de Sorte",
+        nome: "Drone de Entrega",
         raridade: "Rara",
         cor: "rara",
-        tipo: "Armadilha",
+        tipo: "Tecnologia",
         atk: null,
         def: null,
-        efeito: "Cancela o efeito da carta do adversário se ele errar o cálculo percentual.",
-        icon: "fa-shield-cat",
-        bgHex: "#1565C0",
-        promptImagem: "Yu-Gi-Oh style card art, Anuladores de Sorte, two crossed mystic blue chains blocking a glowing energy portal, digital painting, dramatic lighting, TCG illustration, no text",
+        efeito: "Sobrevoa a arena e entrega suprimentos valiosos no centro do campo.",
+        svgIcon: `<svg class="w-16 h-16 drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="10" fill="none" stroke="#60a5fa" stroke-width="3"/>
+          <circle cx="44" cy="20" r="10" fill="none" stroke="#60a5fa" stroke-width="3"/>
+          <rect x="22" y="26" width="20" height="12" rx="4" fill="#1e3a8a" stroke="#1d4ed8" stroke-width="2"/>
+          <rect x="26" y="38" width="12" height="12" rx="2" fill="#0284c7"/>
+          <path d="M20 20L26 28M44 20L38 28" stroke="#3b82f6" stroke-width="3"/>
+        </svg>`,
+        bgStyle: "ray-bg-rara",
+        borderHex: "#3b82f6",
         missaoMatematica: "No deck há 5 Comuns, 3 Raras e 2 Especiais. Qual a probabilidade de tirar uma Rara OU uma Especial em 1 saque?",
         valorProbabilistico: "5/10 = 50%"
       },
       {
         id: 9,
-        nome: "Supremo Imperador do Acaso",
+        nome: "Casaco do Mestre",
         raridade: "Especial",
         cor: "especial",
-        tipo: "Monstro",
+        tipo: "Relíquia",
         atk: 3000,
         def: 2500,
-        efeito: "Domina a arena! Permite fazer duas compras seguidas no próximo turno.",
-        icon: "fa-crown",
-        bgHex: "#FFD700",
-        promptImagem: "Yu-Gi-Oh style card art, Supremo Imperador do Acaso, imposing warrior in glittering golden armor wearing a prism crown holding a golden orb, digital painting, dramatic lighting, TCG illustration, no text",
+        efeito: "Traje lendário que concede autoridade total sobre o resultado da arena.",
+        svgIcon: `<svg class="w-16 h-16 drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 16L32 8L46 16L54 52H10L18 16Z" fill="#1e1b4b" stroke="#f59e0b" stroke-width="2"/>
+          <path d="M24 16C24 24 40 24 40 16" fill="#facc15"/>
+          <path d="M32 24V52" stroke="#fbbf24" stroke-width="3"/>
+          <path d="M26 32L32 28L38 32" stroke="#f59e0b" stroke-width="2"/>
+        </svg>`,
+        bgStyle: "ray-bg-especial",
+        borderHex: "#facc15",
         missaoMatematica: "A chance de tirar 1 Especial é 2/10. Qual a probabilidade de tirar 2 Especiais seguidas com reposição?",
         valorProbabilistico: "2/10 × 2/10 = 4/100 = 4%"
       },
       {
         id: 10,
-        nome: "Milagre da Certeza",
+        nome: "Diamante Místico",
         raridade: "Especial",
         cor: "especial",
-        tipo: "Magia",
+        tipo: "Relíquia",
         atk: null,
         def: null,
-        efeito: "Converte qualquer evento incerto em 100% de vitória no turno atual.",
-        icon: "fa-sun",
-        bgHex: "#FFD700",
-        promptImagem: "Yu-Gi-Oh style card art, Milagre da Certeza, beam of golden light from heavens opening a golden spellbook with glowing math symbols, digital painting, dramatic lighting, TCG illustration, no text",
+        efeito: "Cristal supremo que transforma a incerteza em 100% de vitória garantida.",
+        svgIcon: `<svg class="w-16 h-16 drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="32,6 52,22 32,58 12,22" fill="#2563eb" stroke="#60a5fa" stroke-width="2"/>
+          <polygon points="32,6 42,22 32,58" fill="#3b82f6"/>
+          <polygon points="32,6 22,22 32,58" fill="#1d4ed8"/>
+          <ellipse cx="32" cy="32" rx="26" ry="8" fill="none" stroke="#facc15" stroke-width="2" stroke-dasharray="4 2"/>
+        </svg>`,
+        bgStyle: "ray-bg-especial",
+        borderHex: "#facc15",
         missaoMatematica: "Em retiradas sem reposição, qual o número mínimo de retiradas para garantir a retirada de ao menos 1 carta Comum?",
         valorProbabilistico: "6 retiradas (3 Raras + 2 Especiais + 1 Comum)"
       }
@@ -870,9 +926,7 @@
         if (saved) {
           studentData = JSON.parse(saved);
         }
-      } catch(e) {
-        // Fallback to memory
-      }
+      } catch(e) {}
 
       if (studentData.name && studentData.turma) {
         updateStudentUI();
@@ -899,17 +953,11 @@
       const today = new Date();
       const formattedDate = today.toLocaleDateString('pt-BR');
 
-      studentData = {
-        name: name,
-        turma: turma,
-        date: formattedDate
-      };
+      studentData = { name, turma, date: formattedDate };
 
       try {
         localStorage.setItem('duelo_student_data', JSON.stringify(studentData));
-      } catch(e) {
-        // Fallback
-      }
+      } catch(e) {}
 
       updateStudentUI();
       closeWelcomeOverlay();
@@ -917,7 +965,6 @@
     }
 
     function updateStudentUI() {
-      // Update Header Badge
       const badgeContainer = document.getElementById('header-student-badge');
       const badgeInfo = document.getElementById('badge-student-info');
       if (badgeContainer && badgeInfo) {
@@ -925,7 +972,6 @@
         badgeContainer.classList.remove('hidden');
       }
 
-      // Update Ficha & Gráficos Tab Header
       const fichaName = document.getElementById('ficha-student-name');
       const fichaTurma = document.getElementById('ficha-student-turma');
       const fichaDate = document.getElementById('ficha-date');
@@ -951,10 +997,6 @@
       overlay.classList.add('opacity-0', 'pointer-events-none');
     }
 
-    /* 
-      Função de Montagem do Deck
-      Garante a composição exata (5 Comuns, 3 Raras, 2 Especiais) do espaço amostral.
-    */
     function getDeckComposition() {
       const comuns = DECK.filter(card => card.raridade === "Comum");
       const raras = DECK.filter(card => card.raridade === "Rara");
@@ -993,7 +1035,7 @@
 
     function drawCard() {
       if (currentRound >= MAX_ROUNDS) {
-        showToast("Você já concluiu as 20 retiradas da rodada! Limpe a ficha para jogar novamente.");
+        showToast("Você já concluiu as 20 retiradas! Limpe a ficha para jogar novamente.");
         return;
       }
 
@@ -1076,12 +1118,6 @@
       badgeContainer.className = "bg-amber-950/90 border-2 border-amber-400 px-4 py-2.5 rounded-xl text-center shrink-0 animate-victory-glow";
     }
 
-    /* 
-      ========================================================================
-      renderDrawnCard(card)
-      Exibe a carta sorteada na Arena com botão para revelar resposta sem spoiler
-      ========================================================================
-    */
     function renderDrawnCard(card) {
       document.getElementById('card-placeholder').classList.add('hidden');
       const container = document.getElementById('active-card-container');
@@ -1090,37 +1126,37 @@
       const cardElem = document.getElementById('drawn-card');
       
       let borderClass = "border-emerald-500 glow-comum";
-      let badgeBg = "bg-emerald-900/80 text-emerald-300 border-emerald-500/50";
+      let badgeBg = "bg-emerald-600 text-white border-emerald-400";
       if (card.raridade === "Rara") {
         borderClass = "border-blue-500 glow-rara";
-        badgeBg = "bg-blue-900/80 text-blue-300 border-blue-500/50";
+        badgeBg = "bg-blue-600 text-white border-blue-400";
       } else if (card.raridade === "Especial") {
         borderClass = "border-amber-400 glow-especial";
-        badgeBg = "bg-amber-900/80 text-yellow-300 border-amber-400/50";
+        badgeBg = "bg-amber-500 text-slate-950 border-yellow-300 font-black";
       }
 
       cardElem.className = `w-full bg-slate-950 border-4 ${borderClass} rounded-2xl p-4 shadow-2xl flex flex-col justify-between space-y-3 relative overflow-hidden`;
 
       cardElem.innerHTML = `
         <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-          <span class="font-fantasy font-extrabold text-sm text-slate-100 uppercase tracking-wide">${card.nome}</span>
-          <span class="text-[10px] px-2 py-0.5 rounded font-black uppercase border ${badgeBg}">${card.raridade}</span>
+          <span class="font-fantasy font-black text-base text-slate-100 uppercase tracking-wide">${card.nome}</span>
+          <span class="text-[11px] px-3 py-1 rounded-full font-black uppercase border shadow ${badgeBg}">${card.raridade}</span>
         </div>
 
-        <div class="h-28 bg-gradient-to-b from-slate-900 to-slate-950 rounded-xl border border-slate-800 flex items-center justify-center relative overflow-hidden">
-          <i class="fa-solid ${card.icon} text-5xl opacity-80" style="color: ${card.bgHex}"></i>
-          <span class="absolute bottom-1.5 right-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-900/90 px-2 py-0.5 rounded border border-slate-800">
-            [${card.tipo}]
+        <div class="h-36 ${card.bgStyle} rounded-xl border border-slate-700/80 flex items-center justify-center relative overflow-hidden shadow-inner">
+          <div class="transform transition hover:scale-110 duration-300">
+            ${card.svgIcon}
+          </div>
+          <span class="absolute bottom-1.5 right-2 text-[10px] font-bold text-slate-100 uppercase tracking-wider bg-slate-950/80 px-2 py-0.5 rounded border border-slate-700">
+            ${card.tipo}
           </span>
         </div>
 
-        <!-- Efeito da Carta -->
-        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center">
+        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-xs text-slate-300">
           <p class="leading-tight"><strong class="text-slate-100">Efeito:</strong> ${card.efeito}</p>
         </div>
 
-        <!-- Missão Matemática para o Quadro -->
-        <div class="bg-amber-950/30 border-2 border-dashed border-amber-500/60 p-2.5 rounded-xl text-xs text-amber-200 flex items-start gap-2 shadow-inner">
+        <div class="bg-amber-950/40 border-2 border-dashed border-amber-500/60 p-2.5 rounded-xl text-xs text-amber-200 flex items-start gap-2 shadow-inner">
           <i class="fa-solid fa-calculator text-amber-400 text-sm mt-0.5 shrink-0"></i>
           <div>
             <span class="font-bold text-amber-300 block uppercase text-[10px] tracking-wider mb-0.5">Desafio no Quadro:</span>
@@ -1128,24 +1164,22 @@
           </div>
         </div>
 
-        <!-- Atributos & Botão de Resposta no Rodapé -->
         <div class="flex items-center justify-between pt-1">
-          ${card.tipo === 'Monstro' ? `
+          ${card.atk ? `
             <div class="flex items-center gap-2 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 font-mono text-xs font-black">
               <span class="text-amber-400">ATK ${card.atk}</span>
               <span class="text-blue-400">DEF ${card.def}</span>
             </div>
           ` : '<div></div>'}
 
-          <!-- Selo Probabilístico Oculto por Padrão -->
           <div class="flex items-center">
-            <button id="card-prob-btn" onclick="toggleCardAnswer()" class="flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 px-2.5 py-1 rounded-lg text-amber-300 font-mono font-bold text-xs shadow transition active:scale-95">
+            <button id="card-prob-btn" onclick="toggleCardAnswer()" class="flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 px-3 py-1.5 rounded-lg text-amber-300 font-mono font-bold text-xs shadow transition active:scale-95">
               <i class="fa-solid fa-eye text-amber-400"></i>
               <span>Ver Resposta</span>
             </button>
-            <button id="card-prob-val" onclick="toggleCardAnswer()" class="hidden flex items-center gap-1.5 bg-amber-500/20 border border-amber-400/60 px-2.5 py-1 rounded-lg text-amber-300 font-mono font-bold text-xs shadow hover:bg-amber-500/30 transition">
+            <button id="card-prob-val" onclick="toggleCardAnswer()" class="hidden flex items-center gap-1.5 bg-amber-500/20 border border-amber-400/60 px-3 py-1.5 rounded-lg text-amber-300 font-mono font-bold text-xs shadow hover:bg-amber-500/30 transition">
               <i class="fa-solid fa-dice text-amber-400"></i>
-              <span>Resposta: ${card.valorProbabilistico}</span>
+              <span>P = ${card.valorProbabilistico}</span>
               <i class="fa-solid fa-eye-slash text-amber-400/70 ml-1 text-[10px]"></i>
             </button>
           </div>
@@ -1275,25 +1309,19 @@
       }
     }
 
-    /* 
-      ========================================================================
-      renderDeckGallery()
-      Exibe as 10 cartas na aba "Deck de 10 Cartas" com botões de resposta ocultos
-      ========================================================================
-    */
     function renderDeckGallery() {
       const gallery = document.getElementById('deck-gallery-grid');
       gallery.innerHTML = '';
 
       DECK.forEach(card => {
-        let borderClass = "border-emerald-500/80";
-        let badgeBg = "bg-emerald-900/80 text-emerald-300 border-emerald-500/50";
+        let borderClass = "border-emerald-500";
+        let badgeBg = "bg-emerald-600 text-white border-emerald-400";
         if (card.raridade === "Rara") {
-          borderClass = "border-blue-500/80";
-          badgeBg = "bg-blue-900/80 text-blue-300 border-blue-500/50";
+          borderClass = "border-blue-500";
+          badgeBg = "bg-blue-600 text-white border-blue-400";
         } else if (card.raridade === "Especial") {
-          borderClass = "border-amber-400/80";
-          badgeBg = "bg-amber-900/80 text-yellow-300 border-amber-400/50";
+          borderClass = "border-amber-400";
+          badgeBg = "bg-amber-500 text-slate-950 border-yellow-300 font-black";
         }
 
         const cardBox = document.createElement('div');
@@ -1302,12 +1330,14 @@
         cardBox.innerHTML = `
           <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
             <span class="font-fantasy font-bold text-xs text-slate-100 uppercase truncate max-w-[120px]">${card.nome}</span>
-            <span class="text-[9px] px-1.5 py-0.5 rounded font-black uppercase border ${badgeBg}">${card.raridade}</span>
+            <span class="text-[9px] px-2 py-0.5 rounded font-black uppercase border ${badgeBg}">${card.raridade}</span>
           </div>
 
-          <div class="h-20 bg-slate-900/80 rounded-lg border border-slate-800 flex items-center justify-center relative">
-            <i class="fa-solid ${card.icon} text-3xl" style="color: ${card.bgHex}"></i>
-            <span class="absolute bottom-1 right-1 text-[9px] font-bold text-slate-400 uppercase bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+          <div class="h-24 ${card.bgStyle} rounded-lg border border-slate-700/80 flex items-center justify-center relative overflow-hidden">
+            <div class="scale-75">
+              ${card.svgIcon}
+            </div>
+            <span class="absolute bottom-1 right-1 text-[8px] font-bold text-slate-100 uppercase bg-slate-950/80 px-1.5 py-0.5 rounded border border-slate-700">
               ${card.tipo}
             </span>
           </div>
@@ -1316,26 +1346,23 @@
             ${card.efeito}
           </p>
 
-          <!-- Caixa Compacta de Missão Matemática -->
           <div class="bg-amber-950/20 border border-dashed border-amber-500/40 p-2 rounded text-[10px] text-amber-200/90 flex gap-1.5 items-start">
-            <i class="fa-solid fa-ruler-combined text-amber-400 text-xs mt-0.5 shrink-0"></i>
+            <i class="fa-solid fa-calculator text-amber-400 text-xs mt-0.5 shrink-0"></i>
             <span class="leading-tight">${card.missaoMatematica}</span>
           </div>
 
-          <!-- Rodapé com Atributos & Botão de Resposta -->
           <div class="flex items-center justify-between pt-1 border-t border-slate-800/80 font-mono text-[10px]">
-            ${card.tipo === 'Monstro' ? `
+            ${card.atk ? `
               <span class="text-amber-400 font-bold">ATK ${card.atk}</span>
             ` : '<span class="text-slate-500 font-medium">Efeito</span>'}
 
-            <!-- Botão de Revelar Resposta na Galeria do Deck -->
             <div class="flex items-center">
               <button id="gallery-btn-${card.id}" onclick="toggleGalleryAnswer(${card.id})" class="text-amber-300 font-bold bg-amber-500/20 hover:bg-amber-500/30 px-2 py-0.5 rounded border border-amber-500/40 transition active:scale-95 flex items-center gap-1">
                 <i class="fa-solid fa-eye text-[9px]"></i>
                 <span>Ver Resposta</span>
               </button>
               <button id="gallery-ans-${card.id}" onclick="toggleGalleryAnswer(${card.id})" class="hidden text-amber-300 font-bold bg-amber-500/20 px-2 py-0.5 rounded border border-amber-400/60 flex items-center gap-1">
-                <span>Resposta: ${card.valorProbabilistico}</span>
+                <span>P = ${card.valorProbabilistico}</span>
                 <i class="fa-solid fa-eye-slash text-[9px] text-amber-400/70"></i>
               </button>
             </div>
@@ -1400,3 +1427,4 @@
   </script>
 </body>
 </html>
+```
